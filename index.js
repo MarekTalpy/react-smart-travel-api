@@ -1,7 +1,11 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+
 import itineraryRoutes from './routes/itinerary.js';
+import connectDB from './config/db.js';
+
+connectDB();
 
 const app = express();
 
