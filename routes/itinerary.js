@@ -2,6 +2,7 @@ import express from 'express';
 
 import openai from '../services/openai.js';
 import Itinerary from '../models/Itinerary.js';
+import { checkCityExists } from '../services/geocoding.js';
 
 const router = express.Router();
 
@@ -13,6 +14,11 @@ router.post('/preview', async (req, res) => {
     return res.status(400).json({
       error: "Invalid input. 'city' must be a string and 'days' must be a positive integer.",
     });
+  }
+
+  const cityExists = await checkCityExists(city);
+  if (!cityExists) {
+    return res.status(400).json({ error: `City "${city}" does not exist.` });
   }
 
   try {
