@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY; // store key in .env
+
 /**
- * Check if a city exists using OpenStreetMap Nominatim API.
+ * Check if a city exists using Google Maps Geocoding API.
  * @param {string} cityName
  * @returns {Promise<boolean>}
  */
@@ -9,21 +11,19 @@ export async function checkCityExists(cityName) {
   if (!cityName) return false;
 
   try {
-    const res = await axios.get('https://nominatim.openstreetmap.org/search', {
+    const res = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
       params: {
-        q: cityName,
-        format: 'json',
-        addressdetails: 1,
-        limit: 1,
+        address: cityName,
+        key: GOOGLE_MAPS_API_KEY,
       },
     });
 
-    if (res.data.length === 0) return false;
+    const results = res.data.results;
+    if (!results || results.length === 0) return false;
 
-    const type = res.data[0].type; // "city", "town", "village", etc.
-    return type === 'city' || type === 'town' || type === 'village';
+    return results.some((r) => r.types.includes('locality'));
   } catch (err) {
     console.error('Geocoding error:', err);
-    return false; // assume invalid on error
+    return false;
   }
 }
